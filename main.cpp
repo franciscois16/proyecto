@@ -6,6 +6,8 @@
 BITMAP *buffer;
 BITMAP *bufbmp;
 BITMAP *ladrillo;
+BITMAP *burbuja;
+BITMAP *burbujabmp;
 
 BITMAP *persobmp;
 BITMAP *perso;
@@ -23,7 +25,7 @@ void dibujarpersonaje();
 void dibujamapa();
 void pantalla();
 void dibujarbala();
-
+void dibujarburbuja();
 //char leido[600];
 
 /*
@@ -68,8 +70,19 @@ int posy=51*10;
 }personaje;
 
 
+typedef struct{
+
+int direccion=1;
+int posx;
+int posy;
+	
+}burbujas;
+
+
 personaje JJ;
 personaje BA;
+burbujas BU;
+
 
 	
 	
@@ -131,10 +144,15 @@ main()
 	disparobmp= load_bitmap("disparo2.bmp",NULL);
 	dispa = create_bitmap(30,32);
 	perso = create_bitmap(30,32);
+	burbuja = create_bitmap(30,32);
+	burbujabmp= load_bitmap("burbuja.bmp",NULL);
 	
 	 cargarmapaarchivo();
 BA.posx=50*25;
 BA.posy=51*10;
+BU.direccion=1;
+BU.posx=30*10;
+BU.posy=30*10;
 	
 	while(!key[KEY_ESC]){
 			if(key[KEY_RIGHT]) direccion = 0;
@@ -171,6 +189,7 @@ BA.posy=51*10;
 		dibujamapa();
 		dibujarpersonaje();
 		dibujarbala();
+		dibujarburbuja();
 		pantalla();
 		
 rest(150);
@@ -211,12 +230,6 @@ blit(buffer,screen,0,0,0,0,900,570);}
 
 void dibujarpersonaje(){
 	
-	
-
-		
-
-
-
 	blit(persobmp,perso,direccion*30,0,0,0,30,32);
 	//	JJ.posx=30*10;
 //	JJ.posy=30*10;
@@ -224,13 +237,10 @@ void dibujarpersonaje(){
 }
 
 void dibujarbala(){
-	
-	
-
-		
 
 BA.posy=BA.posy-30;
-if(BA.posy =='x')
+
+if(mapa1[BA.posx/30][BA.posy/30] == 'x' )
 BA.posx=30*30;
 
 
@@ -239,7 +249,23 @@ BA.posx=30*30;
 	draw_sprite(buffer,dispa,BA.posx,BA.posy);
 }
 
+void dibujarburbuja(){
+	
+	
+	
+	if(mapa1[BU.posx/30][BU.posy/30]=='x')
+	BU.direccion*-1;
 
+	if(BU.direccion==1)
+	BU.posx=BU.posx+30;
+	else if(BU.direccion==-1)
+	BU.posx=BU.posx-30;
+	
+		blit(burbujabmp,burbuja,0,0,0,0,30,32);
+	//	JJ.posx=30*10
+	draw_sprite(buffer,burbuja,BU.posx,BU.posy);
+	
+}
 
 
 
