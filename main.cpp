@@ -6,6 +6,7 @@
 BITMAP *buffer;
 BITMAP *bufbmp;
 BITMAP *ladrillo;
+BITMAP  *escalera;
 BITMAP *burbuja;
 BITMAP *burbujabmp;
 
@@ -73,8 +74,8 @@ int posy=51*10;
 typedef struct{
 
 int direccion=1;
-int posx;
-int posy;
+int posx=30*10;
+int posy=30*10;
 	
 }burbujas;
 
@@ -139,6 +140,7 @@ main()
 
 	buffer = create_bitmap(900,570);
 	ladrillo = load_bitmap("ladrillo.bmp",NULL);
+	escalera = load_bitmap("escalera.bmp",NULL);
 	persobmp= load_bitmap("personajes.bmp",NULL);
 	bufbmp= load_bitmap("fondo.bmp",NULL);
 	disparobmp= load_bitmap("disparo2.bmp",NULL);
@@ -163,21 +165,39 @@ BU.posy=30*10;
 				  direccion = 2;		
 				// mapa[JJ.posx][JJ.posy-30]='a';
 				 } 	
-		 	
+		 		else if(key[KEY_UP]) direccion = 3;
+		 		else if(key[KEY_DOWN]) direccion = 4;
 		 	
 		 	
 		 	if(direccion==1&&key[KEY_LEFT]){
-			 if(mapa1[JJ.posx-30/30][JJ.posy/30] == 'x')
-			  direccion = 4;
+			 if(mapa1[(JJ.posx/30)-1][JJ.posy/30] == 'x')
+			  direccion = 6;
 			  else JJ.posx -= 30  ;
 			  }
 			  printf(" pos de x %d",JJ.posx);
 			  
 			if(direccion==0&&key[KEY_RIGHT]){
-			if(mapa1[(JJ.posx+30)/30][JJ.posy/30] == 'x')
-			  direccion = 4;
+			if(mapa1[(JJ.posx/30)+1][JJ.posy/30] == 'x')
+			  direccion = 6;
 			 else JJ.posx += 30  ;
 			 }
+			 
+			 if(direccion==3&&key[KEY_UP]&&mapa1[JJ.posx/30][JJ.posy/30]=='e'){
+			 if(mapa1[JJ.posx][JJ.posy-30/30] == 'e')
+			  direccion = 6;
+			  else JJ.posy -= 30  ;
+			  }
+			  
+			  if(direccion==4&&key[KEY_DOWN]&&mapa1[JJ.posx/30][(JJ.posy/30)+1]=='e'){
+			 if(mapa1[JJ.posx/30][JJ.posy+30/30] == 'x')
+			  direccion = 6;
+			  else JJ.posy += 30  ;
+			  }
+			  
+			  if(mapa1[JJ.posx/30][JJ.posy/30]=='o'&& mapa1[JJ.posx/30][(JJ.posy/30)+1]=='o'){
+			  JJ.posy = JJ.posy+30;
+			  }
+			  printf(" pos de x %d",JJ.posx);
 			 
 			if(BA.posy+30!='x'){
 				BA.posy+30;
@@ -218,6 +238,9 @@ void dibujamapa(){
 				draw_sprite(buffer,ladrillo,i*30,j*30);
 				}
 				
+		if (mapa1[i][j] == 'e'){
+				draw_sprite(buffer,escalera,i*30,j*30);
+							}
 			
 		}
 		
@@ -253,13 +276,25 @@ void dibujarburbuja(){
 	
 	
 	
-	if(mapa1[BU.posx/30][BU.posy/30]=='x')
-	BU.direccion*-1;
+	
+	
 
-	if(BU.direccion==1)
-	BU.posx=BU.posx+30;
-	else if(BU.direccion==-1)
-	BU.posx=BU.posx-30;
+	if(BU.direccion==1){
+	
+	if(mapa1[(BU.posx/30)+1][BU.posy/30]=='x')
+	BU.direccion=2;
+	else BU.posx=BU.posx+30;
+	}
+	
+	if(BU.direccion==2){
+	
+	if(mapa1[(BU.posx/30)-1][BU.posy/30]=='x')
+	BU.direccion=1;
+	else BU.posx=BU.posx-30;
+	}
+	
+	//else if(BU.direccion==2)
+	//BU.posx=BU.posx-30;
 	
 		blit(burbujabmp,burbuja,0,0,0,0,30,32);
 	//	JJ.posx=30*10
