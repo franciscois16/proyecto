@@ -14,6 +14,7 @@ BITMAP *persobmp;
 BITMAP *perso;
 BITMAP *disparobmp;
 BITMAP *dispa;
+BITMAP *trampabmp;
 
 int fil,col,i,j;	
 int direccion=0;
@@ -103,6 +104,11 @@ j=0;
 while(!feof (mapa) ){
  		 
 		 leido = fgetc(mapa);
+		 if(leido=='b'){
+		 BU.posx=i*30;
+		 BU.posy=j*30;
+		  }
+		 
 		 if(leido=='\n'){
 		 i++;
 		 j=0;
@@ -111,9 +117,11 @@ while(!feof (mapa) ){
 			mapa1[i][j]=leido;
 			j++;
 		}
+		
+		
 	
- 	
  }
+ 
 	fclose;
 }
 	
@@ -140,15 +148,17 @@ main()
 	perso = create_bitmap(30,30);
 	burbuja = create_bitmap(30,30);
 	burbujabmp= load_bitmap("IMG/burbuja.bmp",NULL);
+	trampabmp= load_bitmap("IMG/trampa.bmp",NULL);
 	
 	 cargarmapaarchivo();
 BA.posx=50*25;
 BA.posy=51*10;
-BU.direccion=1;
-BU.posx=30*10;
-BU.posy=30*10;
+//BU.direccion=1;
+//BU.posx=30*10;
+//BU.posy=30*10;
+ int vidas=5;
 	
-	while(!key[KEY_ESC]){
+	while(!key[KEY_ESC]&&vidas!=0){
 			if(key[KEY_RIGHT]) direccion = 0;
 				else if(key[KEY_LEFT]) direccion = 1;
 		 		else if(key[KEY_SPACE]){
@@ -202,8 +212,14 @@ BU.posy=30*10;
 				BA.posx=30*30;
 				BU.posy=30*30;
 				}	
-	
- 		
+			 if(mapa1[JJ.posx/30][(JJ.posy/30)]=='t'&&key[KEY_RIGHT]){
+			  JJ.posx = JJ.posx-60;
+			  vidas=vidas-1;
+			  }	
+ 			if(mapa1[JJ.posx/30][(JJ.posy/30)]=='t'&&key[KEY_LEFT]){
+			  JJ.posx = JJ.posx+60;
+			  vidas=vidas-1;
+			  }	
 		 clear(buffer);		
 		
 		dibujamapa();
@@ -238,7 +254,10 @@ void dibujamapa(){
 		if (mapa1[i][j] == 'e'){
 				draw_sprite(buffer,escalera,i*30,j*30);
 							}
-			
+							
+		if (mapa1[i][j] == 't'){
+				draw_sprite(buffer,trampabmp,i*30,j*30);
+							}	
 		}
 		
 	}
@@ -286,4 +305,3 @@ void dibujarburbuja(){
 	draw_sprite(buffer,burbuja,BU.posx,BU.posy);
 	
 }
-
