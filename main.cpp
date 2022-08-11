@@ -16,7 +16,7 @@ BITMAP *disparobmp;
 BITMAP *dispa;
 BITMAP *trampabmp;
 
-int fil,col,i,j;	
+int fil,col,i,j,z;	
 int direccion=0;
 
 char leido;
@@ -72,18 +72,18 @@ int posy=51*10;
 }personaje;
 
 
-typedef struct{
+typedef struct {
 
 int direccion=1;
-int posx=30*10;
-int posy=30*10;
+int posx;
+int posy;
 	
 }burbujas;
 
 
 personaje JJ;
 personaje BA;
-burbujas BU;
+burbujas  BU[5];
 
 
 	
@@ -100,13 +100,16 @@ if(mapa==NULL){
 
 i=0;
 j=0;
+z=0;
 
 while(!feof (mapa) ){
  		 
 		 leido = fgetc(mapa);
 		 if(leido=='b'){
-		 BU.posx=i*30;
-		 BU.posy=j*30;
+		 BU[z].posx=i*30;
+		 BU[z].posy=j*30;
+		 z++;
+		 printf("el valor de z es :%d",z);
 		  }
 		 
 		 if(leido=='\n'){
@@ -135,7 +138,7 @@ main()
 	install_keyboard();
 	set_color_depth(32);
 	set_gfx_mode(GFX_AUTODETECT,900,570,0,0);
-	
+	int nivel=0;
 
 
 	buffer = create_bitmap(900,570);
@@ -157,8 +160,12 @@ BA.posy=51*10;
 //BU.posx=30*10;
 //BU.posy=30*10;
  int vidas=5;
-	
-	while(!key[KEY_ESC]&&vidas!=0){
+ int impacto=0;
+ 
+	while(!key[KEY_ESC]&&vidas!=0&&nivel==0){
+		
+		
+		
 			if(key[KEY_RIGHT]) direccion = 0;
 				else if(key[KEY_LEFT]) direccion = 1;
 		 		else if(key[KEY_SPACE]){
@@ -206,12 +213,17 @@ BA.posy=51*10;
 			}
 			else if(BA.posy+30=='x'){
 			}
-			
-			if(BA.posy/30 == BU.posy/30 && BA.posx/30 == BU.posx/30){
+		for(z=0;z<5;z++){
+			if(BA.posy/30 == BU[z].posy/30 && BA.posx/30 == BU[z].posx/30){
 		
 				BA.posx=30*30;
-				BU.posy=30*30;
-				}	
+				BU[z].posy=30*30;
+				impacto++;
+				if(impacto==5){
+				nivel+=1;	
+				}
+				}
+			}	
 			 if(mapa1[JJ.posx/30][(JJ.posy/30)]=='t'&&key[KEY_RIGHT]){
 			  JJ.posx = JJ.posx-60;
 			  vidas=vidas-1;
@@ -230,6 +242,9 @@ BA.posy=51*10;
 		
 rest(150);
 }
+
+
+
 	allegro_exit();
 	
 	return 0;
@@ -286,22 +301,23 @@ BA.posx=30*30;
 
 void dibujarburbuja(){
 	
+for(z=0;z<5;z++){
 
-	if(BU.direccion==1){
+	if(BU[z].direccion==1){
 	
-	if(mapa1[(BU.posx/30)+1][BU.posy/30]=='x')
-	BU.direccion=2;
-	else BU.posx=BU.posx+30;
+	if(mapa1[(BU[z].posx/30)+1][BU[z].posy/30]=='x')
+	BU[z].direccion=2;
+	else BU[z].posx=BU[z].posx+30;
 	}
 	
-	if(BU.direccion==2){
+	if(BU[z].direccion==2){
 	
-	if(mapa1[(BU.posx/30)-1][BU.posy/30]=='x')
-	BU.direccion=1;
-	else BU.posx=BU.posx-30;
+	if(mapa1[(BU[z].posx/30)-1][BU[z].posy/30]=='x')
+	BU[z].direccion=1;
+	else BU[z].posx=BU[z].posx-30;
 	}
 
 		blit(burbujabmp,burbuja,0,0,0,0,30,32);
-	draw_sprite(buffer,burbuja,BU.posx,BU.posy);
-	
+	draw_sprite(buffer,burbuja,BU[z].posx,BU[z].posy);
+	}
 }
