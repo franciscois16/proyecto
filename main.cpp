@@ -18,6 +18,7 @@ BITMAP *trampabmp;
 
 int fil,col,i,j,z;	
 int direccion=0;
+int nivel=0;
 
 char leido;
 char mapa1[maxfilas][maxcolumnas];
@@ -90,6 +91,7 @@ burbujas  BU[5];
 	
 void cargarmapaarchivo(){
 
+if(nivel==0){
 
 FILE * mapa = fopen ("mapa.txt" , "r");
 if(mapa==NULL){
@@ -124,6 +126,45 @@ while(!feof (mapa) ){
 		
 	
  }
+ }
+ 
+ if(nivel==1){
+
+FILE * mapa = fopen ("mapa2.txt" , "r");
+if(mapa==NULL){
+	printf("error al abrir el archivo");
+	return;
+	
+}
+
+i=0;
+j=0;
+z=0;
+
+while(!feof (mapa) ){
+ 		 
+		 leido = fgetc(mapa);
+		 if(leido=='b'){
+		 BU[z].posx=i*30;
+		 BU[z].posy=j*30;
+		 z++;
+		 printf("el valor de z es :%d",z);
+		  }
+		 
+		 if(leido=='\n'){
+		 i++;
+		 j=0;
+		  }
+		else{
+			mapa1[i][j]=leido;
+			j++;
+		}
+		
+		
+	
+ }
+ }
+ 
  
 	fclose;
 }
@@ -138,9 +179,15 @@ main()
 	install_keyboard();
 	set_color_depth(32);
 	set_gfx_mode(GFX_AUTODETECT,900,570,0,0);
-	int nivel=0;
-
-
+	
+	if(install_sound(DIGI_AUTODETECT,MIDI_AUTODETECT,NULL)!=0){
+		allegro_message("error: iniciando el sonido \n \n",allegro_error);
+		return 1;
+	}
+	set_volume(70,70);
+		
+	MIDI *musica = load_midi("IMG/musicafondo.mid");
+	SAMPLE *shot = load_wav("IMG/diparo.wav");
 	buffer = create_bitmap(900,570);
 	ladrillo = load_bitmap("IMG/ladrillo.bmp",NULL);
 	escalera = load_bitmap("IMG/escalera.bmp",NULL);
@@ -162,8 +209,181 @@ BA.posy=51*10;
  int vidas=5;
  int impacto=0;
  
+ play_midi(musica,1);
+
 	while(!key[KEY_ESC]&&vidas!=0&&nivel==0){
 		
+			if(key[KEY_RIGHT]) direccion = 0;
+				else if(key[KEY_LEFT]) direccion = 1;
+		 		else if(key[KEY_SPACE]){
+		 		
+		 		 BA.posx=JJ.posx;
+		 		 BA.posy=JJ.posy-30;
+				  direccion = 2;		
+				// mapa[JJ.posx][JJ.posy-30]='a';
+				 } 	
+		 		else if(key[KEY_UP]) direccion = 3;
+		 		else if(key[KEY_DOWN]) direccion = 4;
+		 	
+		 	
+		 	if(direccion==1&&key[KEY_LEFT]){
+			 if(mapa1[(JJ.posx/30)-1][JJ.posy/30] == 'x')
+			  direccion = 6;
+			  else JJ.posx -= 30  ;
+			  }
+			  printf(" pos de x %d",JJ.posx);
+			  
+			if(direccion==0&&key[KEY_RIGHT]){
+			if(mapa1[(JJ.posx/30)+1][JJ.posy/30] == 'x')
+			  direccion = 6;
+			 else JJ.posx += 30  ;
+			 }
+			 
+			 if(direccion==3&&key[KEY_UP]&&mapa1[JJ.posx/30][JJ.posy/30]=='e'){
+			 if(mapa1[JJ.posx][JJ.posy-30/30] == 'e')
+			  direccion = 6;
+			  else JJ.posy -= 30  ;
+			  }
+			  
+			  if(direccion==4&&key[KEY_DOWN]&&mapa1[JJ.posx/30][(JJ.posy/30)+1]=='e'){
+			 if(mapa1[JJ.posx/30][JJ.posy+30/30] == 'x')
+			  direccion = 6;
+			  else JJ.posy += 30  ;
+			  }
+			  
+			  if(mapa1[JJ.posx/30][JJ.posy/30]=='o'&& mapa1[JJ.posx/30][(JJ.posy/30)+1]=='o'){
+			  JJ.posy = JJ.posy+30;
+			  }
+			  printf(" pos de x %d",JJ.posx);
+			 
+			if(BA.posy+30!='x'){
+				BA.posy+30;
+			}
+			else if(BA.posy+30=='x'){
+			}
+		for(z=0;z<5;z++){
+			if(BA.posy/30 == BU[z].posy/30 && BA.posx/30 == BU[z].posx/30){
+		
+				BA.posx=30*30;
+				BU[z].posy=30*30;
+				impacto++;
+				if(impacto==5){
+				nivel+=1;	
+				}
+				}
+			}	
+			 if(mapa1[JJ.posx/30][(JJ.posy/30)]=='t'&&key[KEY_RIGHT]){
+			  JJ.posx = JJ.posx-60;
+			  vidas=vidas-1;
+			  }	
+ 			if(mapa1[JJ.posx/30][(JJ.posy/30)]=='t'&&key[KEY_LEFT]){
+			  JJ.posx = JJ.posx+60;
+			  vidas=vidas-1;
+			  }	
+		 clear(buffer);		
+		
+		dibujamapa();
+		dibujarpersonaje();
+		dibujarbala();
+		dibujarburbuja();
+		pantalla();
+		
+rest(150);
+}
+
+	while(!key[KEY_ESC]&&vidas!=0&&nivel==0){
+		int impacto=0;
+		
+		
+			if(key[KEY_RIGHT]) direccion = 0;
+				else if(key[KEY_LEFT]) direccion = 1;
+		 		else if(key[KEY_SPACE]){
+		 		 BA.posx=JJ.posx;
+		 		 BA.posy=JJ.posy-30;
+				  direccion = 2;		
+				// mapa[JJ.posx][JJ.posy-30]='a';
+				 } 	
+		 		else if(key[KEY_UP]) direccion = 3;
+		 		else if(key[KEY_DOWN]) direccion = 4;
+		 	
+		 	
+		 	if(direccion==1&&key[KEY_LEFT]){
+			 if(mapa1[(JJ.posx/30)-1][JJ.posy/30] == 'x')
+			  direccion = 6;
+			  else JJ.posx -= 30  ;
+			  }
+			  printf(" pos de x %d",JJ.posx);
+			  
+			if(direccion==0&&key[KEY_RIGHT]){
+			if(mapa1[(JJ.posx/30)+1][JJ.posy/30] == 'x')
+			  direccion = 6;
+			 else JJ.posx += 30  ;
+			 }
+			 
+			 if(direccion==3&&key[KEY_UP]&&mapa1[JJ.posx/30][JJ.posy/30]=='e'){
+			 if(mapa1[JJ.posx][JJ.posy-30/30] == 'e')
+			  direccion = 6;
+			  else JJ.posy -= 30  ;
+			  }
+			  
+			  if(direccion==4&&key[KEY_DOWN]&&mapa1[JJ.posx/30][(JJ.posy/30)+1]=='e'){
+			 if(mapa1[JJ.posx/30][JJ.posy+30/30] == 'x')
+			  direccion = 6;
+			  else JJ.posy += 30  ;
+			  }
+			  
+			  if(mapa1[JJ.posx/30][JJ.posy/30]=='o'&& mapa1[JJ.posx/30][(JJ.posy/30)+1]=='o'){
+			  JJ.posy = JJ.posy+30;
+			  }
+			  printf(" pos de x %d",JJ.posx);
+			 
+			if(BA.posy+30!='x'){
+				BA.posy+30;
+			}
+			else if(BA.posy+30=='x'){
+			}
+		for(z=0;z<5;z++){
+			if(BA.posy/30 == BU[z].posy/30 && BA.posx/30 == BU[z].posx/30){
+		
+				BA.posx=30*30;
+				BU[z].posy=30*30;
+				impacto++;
+				if(impacto==5){
+				nivel+=1;	
+				}
+				}
+			}	
+			 if(mapa1[JJ.posx/30][(JJ.posy/30)]=='t'&&key[KEY_RIGHT]){
+			  JJ.posx = JJ.posx-60;
+			  vidas=vidas-1;
+			  }	
+ 			if(mapa1[JJ.posx/30][(JJ.posy/30)]=='t'&&key[KEY_LEFT]){
+			  JJ.posx = JJ.posx+60;
+			  vidas=vidas-1;
+			  }	
+		 clear(buffer);		
+		
+		dibujamapa();
+		dibujarpersonaje();
+		dibujarbala();
+		dibujarburbuja();
+		pantalla();
+		
+rest(150);
+}
+
+ cargarmapaarchivo();
+BA.posx=50*25;
+BA.posy=51*10;
+//BU.direccion=1;
+//BU.posx=30*10;
+//BU.posy=30*10;
+
+ impacto=0;
+
+
+	while(!key[KEY_ESC]&&vidas!=0&&nivel==1){
+		int impacto=0;
 		
 		
 			if(key[KEY_RIGHT]) direccion = 0;
