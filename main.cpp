@@ -6,6 +6,7 @@
 #define maxburbujas 2
 #define maxniveles 3
 #define maxrank 5
+#define maxbalas 4
 
 BITMAP *buffer;
 BITMAP *bufbmp;
@@ -35,9 +36,13 @@ void pantalla();
 void dibujarbala();
 void dibujarburbuja();
 void general();
-void colision(int nivel);
+void colision();
 void imprank();
+//void colisionbala();
+int verificabala();
 int verificacambionivel(int nivel);
+void colisionburbuja();
+void enfriamentobala();
 
  
 char leido;
@@ -52,6 +57,15 @@ typedef struct
 		
 }personaje;
 
+typedef struct
+{
+
+	int direccion;
+	int posx;
+	int posy;
+	int activado;
+		
+}bala;
 
 typedef struct 
 {
@@ -69,7 +83,7 @@ typedef struct {
 }ranking;
 
 personaje JJ; /*={1,30*10,51*10};*/
-personaje BA;
+bala BA[maxbalas];
 burbujas  BU[maxburbujas];
 ranking RK[maxrank];
 
@@ -78,6 +92,7 @@ int main()
 
 	int opcion=0;
     int nivel=2;
+    
 	
 	allegro_init();
 	install_keyboard();
@@ -139,9 +154,12 @@ int main()
 		/* ACA DEBERIAS PONER UN WHILE GENERAL PARA EJECUTAR LOS NIVELES*/
 		while(nivel<maxniveles&&opcion==1)
 		{
-		
-		 	BA.posx=50*25;
-		 	BA.posy=51*10;
+			for(z=0;z<maxbalas;z++){
+			 	BA[z].posx=50*25;
+			 	BA[z].posy=-51*10;
+			 	BA[z].activado=0;
+		 	}
+		 	bandera=1;
 		 	cargarmapaarchivo(nivel); /* deberias llamar a cargamapaarchivo con el parametro nivel*/
 		 
 		 	play_midi(musica,1);
@@ -151,7 +169,9 @@ int main()
 			{
 			
 				general();
-				colision(2);
+				colision();
+				colisionburbuja();
+				enfriamentobala();
 			
 				if (verificacambionivel(nivel)==1)
 				{
@@ -177,6 +197,8 @@ END_OF_MAIN();
 
 
 void general(){
+	
+int indicebala;
 
 	if(key[KEY_RIGHT]) 
 		direccion = 0;
@@ -185,12 +207,18 @@ void general(){
 		
  	else if(key[KEY_SPACE ] && bandera==1)
 	{
- 		BA.posx=JJ.posx;
- 		BA.posy=JJ.posy;
- 		bandera = 0;
- 		printf("bandera :%d\n",bandera);
-		direccion = 2;	
-		  
+		
+		indicebala=verificabala();
+		printf("indice bala :%d\n",indicebala);
+		if(indicebala!=-1){
+		
+	 		BA[indicebala].posx=JJ.posx;
+	 		BA[indicebala].posy=JJ.posy;
+	 		BA[indicebala].activado=1;
+	 		bandera = 5;
+	 	//	printf("bandera :%d\n",bandera);
+			direccion = 2;	
+		  }
 		// mapa[JJ.posx][JJ.posy-30]='a';
 	}
  	else if(key[KEY_UP]) 
@@ -231,12 +259,7 @@ void general(){
 		JJ.posy = JJ.posy+30;
 	}
 
-	if(BA.posy+30!='x')
-	{
-		BA.posy+30;
-	}
-	else if(BA.posy+30=='x'){
-	}
+	
 	
 	if(mapa1[JJ.posx/30][(JJ.posy/30)+1]=='t')
 	{
@@ -254,6 +277,7 @@ void general(){
 		JJ.posx = JJ.posx+60;
 		vidas=vidas-1;
 	}	
+	// colisionbala();
 	  
 	clear(buffer);		
 	dibujamapa();
@@ -304,14 +328,11 @@ void dibujarpersonaje()
 
 void dibujarbala()
 {
-	BA.posy=BA.posy-30;
-	
-	if(mapa1[BA.posx/30][BA.posy/30] == 'x'){
-		BA.posx=30*30;
-		bandera =1;
+	// cambiar
+	for(z=0;z<maxbalas;z++){
+		blit(disparobmp,dispa,direccion*30,0,0,0,30,32);
+		draw_sprite(buffer,dispa,BA[z].posx,BA[z].posy);
 	}
-	blit(disparobmp,dispa,direccion*30,0,0,0,30,32);
-	draw_sprite(buffer,dispa,BA.posx,BA.posy);
 }
 
 void dibujarburbuja()
@@ -414,22 +435,30 @@ int verificacambionivel(int nivel)
 	return 0;
 }
 
-void colision(int nivel)
+void colision()
 {
 	int z;
-	for(z=0;z<maxburbujas;z++)
-	{
-		if(BA.posy/30 == BU[z].posy/30 && BA.posx/30 == BU[z].posx/30)
-		{
-			puntaje = puntaje + 100 * vidas;
-			printf(" puntaje %d",puntaje);
-			BA.posx=30*30;
-			bandera = 1;
-			BU[z].posy=30*30;
-		//	printf("el nivel es [%d - %d]", nivel);
-			BU[z].activado=1;
+	
+	for(z=0;z<maxbalas;z++){
+	
+		if(BA[z].posy+30!='x')
+			{
+				BA[z].posy+30;
+				
+			}
+		
+		BA[z].posy=BA[z].posy-30;
+		
+		if(mapa1[BA[z].posx/30][BA[z].posy/30] == 'x'){
+			BA[z].posx=30*30;
+		//	int p;
+			BA[z].activado=0;
+		//	for(p=0;p<maxbalas;p++)
+		//		printf("estado balas indice:%d  estado:%d\n",p,BA[p].activado);
 		}
 		
+		else if(BA[z].posy+30=='x'){
+			}
 	}
 }
 
@@ -454,3 +483,45 @@ void imprank()
 	
 }
 
+int verificabala()
+{
+	
+	
+	for(z=0;z<maxbalas;z++){
+		if(BA[z].activado==0){
+		
+			return z;
+			}
+		
+	}
+	return -1;
+}
+
+void colisionburbuja(){
+	for(z=0;z<maxburbujas;z++)
+	{
+		for(j=0;j<maxbalas;j++)
+		{
+				if((BA[j].posx/30 == BU[z].posx/30 || (BA[j].posx/30)+1 == (BU[z].posx/30) || (BA[j].posx/30)-1 == (BU[z].posx/30) ) && BA[j].posy/30 == BU[z].posy/30 )
+			{
+				puntaje = puntaje + 100 * vidas;
+				printf(" puntaje %d",puntaje);
+				BA[j].posx=30*30;
+				BU[z].posy=30*30;
+			//	printf("el nivel es [%d - %d]", nivel);
+				BU[z].activado=0;
+				printf("choco");
+			}
+		}
+	}
+}
+
+void enfriamentobala(){
+	if(bandera>1)
+		bandera--;
+	
+}
+/*void colisionbala()
+{
+		
+}*/
