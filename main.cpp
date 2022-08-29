@@ -3,50 +3,18 @@
 #include<stdlib.h>
 #define maxfilas 30
 #define maxcolumnas 20
-#define maxburbujas 2
+#define maxburbujas 5
 #define maxniveles 3
 #define maxrank 5
 #define maxbalas 4
+#define maxenemigos 0
 
-BITMAP *buffer;
-BITMAP *bufbmp;
-BITMAP *ladrillo;
-BITMAP  *escalera;
-BITMAP *burbuja;
-BITMAP *burbujabmp;
-
-int fil,col,i,j,z;	
-int direccion=0;
-//	int nivel=0;
-//	int impacto=0;
-int puntaje = 0;
-int vidas=5;
-int bandera = 1;
-	
-BITMAP *persobmp;
-BITMAP *perso;
-BITMAP *disparobmp;
-BITMAP *dispa;
-BITMAP *trampabmp;
-
-void cargarmapaarchivo(int nivel);
-void dibujarpersonaje();
-void dibujamapa();
-void pantalla();
-void dibujarbala();
-void dibujarburbuja();
-void general();
-void colision();
-void imprank();
-//void colisionbala();
-int verificabala();
-int verificacambionivel(int nivel);
-void colisionburbuja();
-void enfriamentobala();
-
- 
-char leido;
-char mapa1[maxfilas][maxcolumnas];
+typedef struct{
+	int posix;
+	int posiy;
+	int direccion;
+	int extra;
+}enmalo;
 
 typedef struct
 {
@@ -82,18 +50,66 @@ typedef struct {
 	int puntos;
 }ranking;
 
+
+BITMAP *buffer;
+BITMAP *bufbmp;
+BITMAP *ladrillo;
+BITMAP  *escalera;
+BITMAP *burbuja;
+BITMAP *burbujabmp;
+
+int fil,col,i,j,z;	
+int direccion=0;
+//	int nivel=0;
+//	int impacto=0;
+int puntaje = 0;
+int vidas=5;
+int bandera = 1;
+	
+BITMAP *persobmp;
+BITMAP *perso;
+BITMAP *disparobmp;
+BITMAP *dispa;
+BITMAP *trampabmp;
+BITMAP *malo;
+BITMAP *malobmp;
+
+
+ 
+char leido;
+char mapa1[maxfilas][maxcolumnas];
+
+void cargarmapaarchivo(int nivel);
+void dibujarpersonaje();
+void dibujamapa();
+void pantalla();
+void dibujarbala();
+void dibujarburbuja();
+void general();
+void colision();
+void imprank();
+void enemigo_mov();
+int verificabala();
+int verificacambionivel(int nivel);
+void colisionburbuja();
+void enfriamentobala();
+void enemigo_mov();
+void dibujarenemigo();
+void colisionenemigo();
+
+
 personaje JJ; /*={1,30*10,51*10};*/
 bala BA[maxbalas];
 burbujas  BU[maxburbujas];
 ranking RK[maxrank];
+enmalo EN;
 
 int main()
 {
 
 	int opcion=0;
-    int nivel=2;
+    int nivel=0;
     
-	
 	allegro_init();
 	install_keyboard();
 	set_color_depth(32);
@@ -121,6 +137,8 @@ int main()
 	burbujabmp= load_bitmap("IMG/burbuja.bmp",NULL);
 	trampabmp= load_bitmap("IMG/trampa.bmp",NULL);
 	BITMAP  *menu =  load_bitmap("IMG/menu.bmp",NULL);
+	malo = create_bitmap(30,30);
+	malobmp= load_bitmap("IMG/enemigo.bmp",NULL);
 	
 	while(opcion!=3)
 	{
@@ -128,7 +146,7 @@ int main()
 		opcion = 0;
 		vidas = 5;
 		puntaje = 0;
-		nivel = 2;
+		nivel = 0;
 		play_midi(musicamenu,1);
 		
 		while(opcion==0)
@@ -148,7 +166,8 @@ int main()
 	
 		if(opcion==2)
 		{
-			imprank();
+			
+			
 		}
 	
 		/* ACA DEBERIAS PONER UN WHILE GENERAL PARA EJECUTAR LOS NIVELES*/
@@ -161,9 +180,9 @@ int main()
 		 	}
 		 	bandera=1;
 		 	cargarmapaarchivo(nivel); /* deberias llamar a cargamapaarchivo con el parametro nivel*/
-		 
+		    printf("pos x: %d y :%d",EN.posix,EN.posiy);//EN.direccion,EN.extra
 		 	play_midi(musica,1);
-			int bandera=1;
+		
 			
 			while(!key[KEY_ESC]&&vidas!=0&&nivel<maxniveles) // pasar el && opcion al while con max niveles
 			{
@@ -182,7 +201,7 @@ int main()
 			 // printf("nivel es %d", nivel);
 		    }
 		 	opcion = 0;		
-			printf("\nnivel:%d opcion:%d\n",nivel,opcion);	
+		//	printf("\nnivel:%d opcion:%d\n",nivel,opcion);	
 			
 		}
 		
@@ -258,6 +277,18 @@ int indicebala;
 	{
 		JJ.posy = JJ.posy+30;
 	}
+	if(mapa1[JJ.posx/30][JJ.posy/30]=='o'&& mapa1[JJ.posx/30][(JJ.posy/30)+1]=='p')
+	{
+		JJ.posy = JJ.posy+30;
+	}
+	if(mapa1[JJ.posx/30][JJ.posy/30]=='o'&& mapa1[JJ.posx/30][(JJ.posy/30)+1]=='m')
+	{
+		JJ.posy = JJ.posy+30;
+	}
+	if(mapa1[JJ.posx/30][JJ.posy/30]=='o'&& mapa1[JJ.posx/30][(JJ.posy/30)+1]=='b')
+	{
+		JJ.posy = JJ.posy+30;
+	}
 
 	
 	
@@ -278,10 +309,15 @@ int indicebala;
 		vidas=vidas-1;
 	}	
 	// colisionbala();
+	
+	
 	  
-	clear(buffer);		
+	clear(buffer);
+	enemigo_mov();
+	colisionenemigo();	
 	dibujamapa();
 	dibujarpersonaje();
+	dibujarenemigo();
 	dibujarbala();
 	dibujarburbuja();
 	pantalla();
@@ -323,7 +359,7 @@ void pantalla()
 void dibujarpersonaje()
 {
 	blit(persobmp,perso,direccion*30,0,0,0,30,32);
-	draw_sprite(buffer,perso,JJ.posx,JJ.posy);
+	draw_sprite(buffer,perso,JJ.posx, JJ.posy);
 }
 
 void dibujarbala()
@@ -364,7 +400,7 @@ void dibujarburbuja()
 void cargarmapaarchivo(int nivel)
 {
  
-FILE * mapa;
+FILE *mapa;
 
 	if (nivel==0)
 	  mapa = fopen ("mapa.txt" , "r");
@@ -381,8 +417,9 @@ FILE * mapa;
 	i=0;
 	j=0;
 	z=0;
+/*Comentar
 
-	while(!feof (mapa) )
+	while(!feof(mapa) )
 	{
 	 		 
 		leido = fgetc(mapa);
@@ -392,6 +429,17 @@ FILE * mapa;
 			BU[z].direccion=1;
 			BU[z].activado=0;
 			z++;
+		}
+		
+		if(leido=='m'){
+			EN.posix=i*30;
+			EN.posiy=j*30;
+			//EN.extra=2;
+			EN.direccion=0;
+			
+			
+			
+			printf("\n mmmmm pos del malo x:%d , y:%d\n",EN.posix,EN.posiy);
 		}
 		  
 		if(leido=='p')
@@ -403,17 +451,48 @@ FILE * mapa;
 		if(leido=='\n')
 		{
 		   i++;
+		  
 		   j=0;
 		}
 		else
 		{
 			mapa1[i][j]=leido;
+			printf("[%d ,%d]", i , j);
 			j++;
 		}
 	
 	}
+	printf("*[%d ,%d]", i , j);*/
  
-	fclose;
+	for (i=0;i<maxfilas;i++){
+  		for(j=0;j<maxcolumnas;j++){
+  			leido = fgetc(mapa);
+			if(leido=='b'){
+				BU[z].posx=i*30;
+				BU[z].posy=j*30;
+				BU[z].direccion=1;
+				BU[z].activado=0;
+				z++;
+			}else if(leido=='m'){
+			EN.posix=i*30;
+			EN.posiy=j*30;
+			//EN.extra=2;
+			EN.direccion=0;	
+			printf("\n mmmmm pos del malo x:%d , y:%d\n",EN.posix,EN.posiy);
+		} else if (leido=='p')
+		{
+			JJ.posx=i*30;
+			JJ.posy=j*30;
+		} 
+		else
+		{
+			mapa1[i][j]=leido;
+		//	printf("[%d ,%d]", i , j);
+		}
+	}
+	leido = fgetc(mapa);
+  }
+	fclose(mapa);
 }
 	
 int verificacambionivel(int nivel)
@@ -462,6 +541,78 @@ void colision()
 	}
 }
 
+
+
+int verificabala()
+{
+
+	for(z=0;z<maxbalas;z++){
+		if(BA[z].activado==0){
+		
+			return z;
+		}
+		
+	}
+	return -1;
+}
+
+void colisionburbuja(){
+	for(z=0;z<maxburbujas;z++)
+	{
+		for(j=0;j<maxbalas;j++)
+		{
+				if((BA[j].posx/30 == BU[z].posx/30 || (BA[j].posx/30)+1 == (BU[z].posx/30) || (BA[j].posx/30)-1 == (BU[z].posx/30) ) && BA[j].posy/30 == BU[z].posy/30 )
+			{
+				puntaje = puntaje + 100 * vidas;
+				printf(" puntaje %d",puntaje);
+				BA[j].posx=30*30;
+				BU[z].posy=30*30;
+			//	printf("el nivel es [%d - %d]", nivel);
+				BU[z].activado=1;
+				printf("choco");
+			}
+		}
+	}
+}
+
+void enfriamentobala(){
+	if(bandera>1)
+		bandera--;
+	
+}
+void enemigo_mov()
+{
+	
+	EN.direccion = JJ.posx - EN.posix;
+	
+	if( EN.direccion > 0)
+		EN.posix += 10;
+	
+	else if(EN.direccion != 0 && EN.direccion < 0)
+		EN.posix -= 10 ;
+	
+}
+
+void colisionenemigo(){
+	
+	if( JJ.posx == EN.posix && JJ.posy == EN.posiy){ 
+	//mapa1[JJ.posx/30][JJ.posy/30] == mapa1[EN.posix/30][EN.posiy/30]
+		vidas -= 1;
+	}
+	
+}
+
+void dibujarenemigo()
+{
+	blit(malobmp,malo,0,0,0,0,30,32);
+	//printf("\npos del malo x:%d , y:%d\n",EN.posix,EN.posiy);
+	draw_sprite(buffer,malo,EN.posix,EN.posiy);	
+	
+	//printf("\npos del malo x:%d , y:%d\n",EN.posix,EN.posiy);
+}
+
+
+
 void imprank()
 {
 	
@@ -482,46 +633,3 @@ void imprank()
 	}
 	
 }
-
-int verificabala()
-{
-	
-	
-	for(z=0;z<maxbalas;z++){
-		if(BA[z].activado==0){
-		
-			return z;
-			}
-		
-	}
-	return -1;
-}
-
-void colisionburbuja(){
-	for(z=0;z<maxburbujas;z++)
-	{
-		for(j=0;j<maxbalas;j++)
-		{
-				if((BA[j].posx/30 == BU[z].posx/30 || (BA[j].posx/30)+1 == (BU[z].posx/30) || (BA[j].posx/30)-1 == (BU[z].posx/30) ) && BA[j].posy/30 == BU[z].posy/30 )
-			{
-				puntaje = puntaje + 100 * vidas;
-				printf(" puntaje %d",puntaje);
-				BA[j].posx=30*30;
-				BU[z].posy=30*30;
-			//	printf("el nivel es [%d - %d]", nivel);
-				BU[z].activado=0;
-				printf("choco");
-			}
-		}
-	}
-}
-
-void enfriamentobala(){
-	if(bandera>1)
-		bandera--;
-	
-}
-/*void colisionbala()
-{
-		
-}*/
