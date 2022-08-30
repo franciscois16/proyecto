@@ -5,7 +5,7 @@
 #define maxcolumnas 20
 #define maxburbujas 5
 #define maxniveles 3
-#define maxrank 5
+#define maxrank 3
 #define maxbalas 4
 #define maxenemigos 0
 
@@ -87,7 +87,7 @@ void dibujarbala();
 void dibujarburbuja();
 void general();
 void colision();
-void imprank();
+void leerrank();
 void enemigo_mov();
 int verificabala();
 int verificacambionivel(int nivel);
@@ -137,6 +137,7 @@ int main()
 	burbujabmp= load_bitmap("IMG/burbuja.bmp",NULL);
 	trampabmp= load_bitmap("IMG/trampa.bmp",NULL);
 	BITMAP  *menu =  load_bitmap("IMG/menu.bmp",NULL);
+	BITMAP  *agradecimientos =  load_bitmap("IMG/agracedimientos.bmp",NULL);
 	malo = create_bitmap(30,30);
 	malobmp= load_bitmap("IMG/enemigo.bmp",NULL);
 	
@@ -158,15 +159,21 @@ int main()
 				opcion = 1;
 		
 			if(key[KEY_2]) 
-				opcion = 2;
+				opcion = 4;
 		
 			if(key[KEY_3]) 
 				opcion = 3;
 		}
 	
-		if(opcion==2)
+		while(opcion==4)
 		{
 			
+			blit(agradecimientos,buffer,0,0,0,0,900,570);
+			blit(buffer,screen,0,0,0,0,900,570);
+		
+			if(key[KEY_ESC]) 
+				opcion = 0;
+		
 			
 		}
 	
@@ -474,21 +481,22 @@ FILE *mapa;
 				BU[z].activado=0;
 				z++;
 			}else if(leido=='m'){
-			EN.posix=i*30;
-			EN.posiy=j*30;
-			//EN.extra=2;
-			EN.direccion=0;	
-			printf("\n mmmmm pos del malo x:%d , y:%d\n",EN.posix,EN.posiy);
-		} else if (leido=='p')
-		{
-			JJ.posx=i*30;
-			JJ.posy=j*30;
-		} 
-		else
-		{
-			mapa1[i][j]=leido;
-		//	printf("[%d ,%d]", i , j);
-		}
+				EN.posix=i*30;
+				EN.posiy=j*30;
+				//EN.extra=2;
+				EN.direccion=0;	
+				printf("\n mmmmm pos del malo x:%d , y:%d\n",EN.posix,EN.posiy);
+			}
+			else if (leido=='p')
+			{
+				JJ.posx=i*30;
+				JJ.posy=j*30;
+			} 
+			else
+			{
+				mapa1[i][j]=leido;
+			//	printf("[%d ,%d]", i , j);
+			}
 	}
 	leido = fgetc(mapa);
   }
@@ -561,7 +569,7 @@ void colisionburbuja(){
 	{
 		for(j=0;j<maxbalas;j++)
 		{
-				if((BA[j].posx/30 == BU[z].posx/30 || (BA[j].posx/30)+1 == (BU[z].posx/30) || (BA[j].posx/30)-1 == (BU[z].posx/30) ) && BA[j].posy/30 == BU[z].posy/30 )
+			if((BA[j].posx/30 == BU[z].posx/30 || (BA[j].posx/30)+1 == (BU[z].posx/30) || (BA[j].posx/30)-1 == (BU[z].posx/30) ) && BA[j].posy/30 == BU[z].posy/30 )
 			{
 				puntaje = puntaje + 100 * vidas;
 				printf(" puntaje %d",puntaje);
@@ -611,25 +619,17 @@ void dibujarenemigo()
 	//printf("\npos del malo x:%d , y:%d\n",EN.posix,EN.posiy);
 }
 
-
-
-void imprank()
+void leerrank()
 {
 	
-	FILE* franking = fopen("ranking.txt","r");
+	FILE *franking;
+	franking = fopen("ranking.txt","rt");
 	int i;
 	
-	for(i=0; i <maxrank; i++)
+	for(i=0;i<maxrank;i++)
 	{
-		fscanf(franking, "%s", RK[i].nombre);
-		fscanf(franking, "%d", &RK[i].puntos);
+		fscanf(franking,"%s",RK[i].nombre);
+		fscanf(franking,"%d",&RK[i].puntos);
 	}
 	fclose(franking);
-	
-	for(i=0; i <maxrank; i++)
-	{
-		printf( "%s", RK[i].nombre);
-		printf("	%d/n", &RK[i].puntos);
-	}
-	
 }
