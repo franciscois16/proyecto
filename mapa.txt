@@ -1,30 +1,30 @@
 xxxxxxxxxxxxxxxxxxxx
-xxxx              xx
-xxx               xx
-xx                xx
-x                 xx
-x                 xx
-x                 xx
-x                 xx
-x                 xx
-x                 xx
-x                 xx
-x       x         xx
-x       x         xx
-xx      x         xx
-xxx     x         xx
-xx      x         xx
-x       x         xx
-x       x         xx
-x                 xx
-x                 xx
-x                 xx
-x                 xx
-x                 xx
-x                 xx
-x                 xx
-x                 xx
-xx                xx
-xxx               xx
-xxxx              xx
+xxxxoooeeeeeeeeeeexx
+xxxooooxoooooxooooxx
+xxoooooxoooooxooooxx
+xooooooooooooxooooxx
+xoooooooooootxooooxx
+xoobooooooooooooooxx
+xoooooooooooooooooxx
+xoooooooooooooooooxx
+xoooooooooooooooooxx
+xoooooooooooooooooxx
+xoooooooxoooooooooxx
+xoooooooxoooooooooxx
+xxooooooxoooooooopxx
+xxxoooooeeeeeeeeeexx
+xxobooooxoooooooooxx
+xoooooooxoooooooooxx
+xoooooooxoooooooooxx
+xoooooooooooooooooxx
+xoooooooooooooooooxx
+xoooobooooooooooooxx
+xoooooooooooooooooxx
+xoooooooooooooooooxx
+xoooooboooooooooooxx
+xoooooooooooxxooooxx
+xooooooooooooxooomxx
+xxoooooxoooooxooooxx
+xxxooooxoooooxobooxx
+xxxxoooeeeeeeeeeeexx
 xxxxxxxxxxxxxxxxxxxx
